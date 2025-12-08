@@ -25,14 +25,27 @@ static const uint8_t fontset[FONTSET_SIZE] = {
     0xF0, 0x80, 0xF0, 0x80, 0x80  // F
 };
 
+/**
+ * @brief Internal state for the random number generator (Xorshift32).
+ */
 static uint32_t rng_state = 0x12345678;
 
+/**
+ * @brief Seed the random number generator.
+ *
+ * @param seed The seed value. If zero, it is replaced with 1.
+ */
 static inline void rng_seed(uint32_t seed) {
   if (seed == 0)
     seed = 1;
   rng_state = seed;
 }
 
+/**
+ * @brief Generate a random 8-bit value using Xorshift32 algorithm.
+ *
+ * @return uint8_t Random byte.
+ */
 static inline uint8_t rng_byte(void) {
   // Xorshift32
   rng_state ^= rng_state << 13;

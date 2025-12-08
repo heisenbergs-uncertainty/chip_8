@@ -71,13 +71,72 @@ typedef struct {
   uint8_t keypad[KEYS_COUNT];  // 16 keys - utilize user input from keyboard
 } chip8_t;
 
+/**
+ * @brief Function pointer type for CHIP-8 opcode handlers.
+ *
+ * Each handler receives a pointer to the chip8_t state.
+ */
 typedef void (*opcodehandler_t)(chip8_t *chip8);
+
+/**
+ * @brief Initialize the CHIP-8 system state.
+ *
+ * @param chip8 Pointer to the CHIP-8 state structure.
+ */
 void init(chip8_t *chip8);
+
+/**
+ * @brief Set the current opcode for the CHIP-8 system.
+ *
+ * @param chip8 Pointer to the CHIP-8 state structure.
+ */
 void set_opcode(chip8_t *chip8);
+
+/**
+ * @brief Process the current instruction for the CHIP-8 system.
+ *
+ * @param chip8 Pointer to the CHIP-8 state structure.
+ */
 void process_instruction(chip8_t *chip8);
+
+/**
+ * @brief Process the current instruction for the CHIP-8 system.
+ *
+ * @param chip8 Pointer to the CHIP-8 state structure.
+ */
+void process_instruction(chip8_t *chip8);
+
+/**
+ * @brief Execute one emulation cycle for the CHIP-8 system.
+ *
+ * @param chip8 Pointer to the CHIP-8 state structure.
+ */
 void cycle(chip8_t *chip8);
+
+/**
+ * @brief Update the CHIP-8 delay and sound timers.
+ *
+ * @param chip8 Pointer to the CHIP-8 state structure.
+ */
 void update_timers(chip8_t *chip8);
+
+/**
+ * @brief Get the value of a display pixel.
+ *
+ * @param chip8 Pointer to the CHIP-8 state structure.
+ * @param x X coordinate of the pixel.
+ * @param y Y coordinate of the pixel.
+ * @return true if the pixel is set, false otherwise.
+ */
 bool get_display_pixel(chip8_t *chip8, int x, int y);
+
+/**
+ * @brief Set the value of a display pixel.
+ *
+ * @param chip8 Pointer to the CHIP-8 state structure.
+ * @param x X coordinate of the pixel.
+ * @param y Y coordinate of the pixel.
+ */
 void set_display_pixel(chip8_t *chip8, int x, int y);
 
 // Op code handling methods
