@@ -265,18 +265,59 @@ void op_8xy6(chip8_t *chip8) {
   chip8->registers[Vx] >>= 1u;
 }
 
-void op_8xy7(chip8_t *chip8) {}
+// SUBN Vx, Vy
+void op_8xy7(chip8_t *chip8) {
+  uint8_t Vx = (chip8->opcode & 0x0F00u) >> 8u;
+  uint8_t Vy = (chip8->opcode & 0x00F0u) >> 4u;
 
-void op_8xyE(chip8_t *chip8) {}
+  if (chip8->registers[Vy] > chip8->registers[Vx]) {
+    chip8->registers[0xF] = 1; // Set borrow flag
+  } else {
+    chip8->registers[0xF] = 0; // Clear borrow flag
+  }
+  chip8->registers[Vx] = chip8->registers[Vy] - chip8->registers[Vx];
+}
 
-void op_9xy0(chip8_t *chip8) {}
+// SHL Vx {, Vy}
+void op_8xyE(chip8_t *chip8) {
+  uint8_t Vx = (chip8->opcode & 0x0F00u) >> 8u;
 
-void op_Annn(chip8_t *chip8) {}
+  chip8->registers[0xF] = (chip8->registers[Vx] & 0x80u) >> 7u; // MSB to VF
 
-void op_Bnnn(chip8_t *chip8) {}
+  chip8->registers[Vx] <<= 1u;
+}
 
-void op_Cxkk(chip8_t *chip8) {}
+// SNE Vx, Vy
+void op_9xy0(chip8_t *chip8) {
+  uint8_t Vx = (chip8->opcode & 0x0F00u) >> 8u;
+  uint8_t Vy = (chip8->opcode & 0x00F0u) >> 4u;
 
+  if (chip8->registers[Vx] != chip8->registers[Vy]) {
+    chip8->pc += 2;
+  }
+}
+
+// LD I, addr
+void op_Annn(chip8_t *chip8) {
+  uint16_t nnn = chip8->opcode & 0x0FFFu;
+  chip8->index = nnn;
+}
+
+// JP V0, addr
+void op_Bnnn(chip8_t *chip8) {
+  uint16_t nnn = chip8->opcode & 0x0FFFu;
+  chip8->pc = nnn + chip8->registers[0];
+}
+
+// RND Vx, byte
+void op_Cxkk(chip8_t *chip8) {
+  int8_t Vx = (chip8->opcode & 0x0F00u) >> 8u;
+  int8_t kk = chip8->opcode & 0x00FFu;
+
+  chip8->registers[Vx] = rng_byte() & kk;
+}
+
+// DRW Vx, Vy, nibble
 void op_Dxyn(chip8_t *chip8) {}
 
 void op_Ex9E(chip8_t *chip8) {}
