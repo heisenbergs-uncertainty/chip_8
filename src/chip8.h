@@ -65,9 +65,8 @@ typedef struct {
   uint16_t stack[STACK_SIZE];
 
   // Display and Input
-  bool diplay[DISPLAY_WIDTH]
-             [DISPLAY_HEIGHT]; // True or false to display each pixel
-  uint8_t keypad[KEYS_COUNT];  // 16 keys - utilize user input from keyboard
+  uint32_t display[DISPLAY_WIDTH * DISPLAY_HEIGHT];
+  uint8_t keypad[KEYS_COUNT]; // 16 keys - utilize user input from keyboard
 } chip8_t;
 
 /**
