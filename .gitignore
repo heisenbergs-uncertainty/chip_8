@@ -1,3 +1,5 @@
 # Nix 
 .direnv
 flake.lock
+*.o
+chip8-emulator
