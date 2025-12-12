@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
 
 static const uint8_t fontset[FONTSET_SIZE] = {
@@ -110,3 +111,88 @@ void set_opcode(chip8_t *chip8) {
   // set opcode for instruction execution
   chip8->opcode = lhsByte << 8 | rhsByte;
 }
+
+void update_timers(chip8_t *chip8) {}
+
+bool get_display_pixel(chip8_t *chip8, int x, int y) { return false; }
+
+void set_display_pixel(chip8_t *chip8, int x, int y) {}
+
+void op_0nnn(chip8_t *chip8) {}
+
+// Set entire display buffer to 0
+void op_00E0(chip8_t *chip8) {
+  memset(chip8->display, 0, sizeof(chip8->display));
+}
+
+// RETURN from subroutine
+void op_00EE(chip8_t *chip8) {
+  --chip8->sp;
+  chip8->pc = chip8->stack[chip8->sp];
+}
+
+void op_1nnn(chip8_t *chip8) {}
+
+void op_2nnn(chip8_t *chip8) {}
+
+void op3xkk(chip8_t *chip8) {}
+
+void op_4xkk(chip8_t *chip8) {}
+
+void op_5xy0(chip8_t *chip8) {}
+
+void op_6xkk(chip8_t *chip8) {}
+
+void op_7xkk(chip8_t *chip8) {}
+
+void op_8xy0(chip8_t *chip8) {}
+
+void op_8xy1(chip8_t *chip8) {}
+
+void op_8xy2(chip8_t *chip8) {}
+
+void op_8xy3(chip8_t *chip8) {}
+
+void op_8xy4(chip8_t *chip8) {}
+
+void op_8xy5(chip8_t *chip8) {}
+
+void op_8xy6(chip8_t *chip8) {}
+
+void op_8xy7(chip8_t *chip8) {}
+
+void op_8xyE(chip8_t *chip8) {}
+
+void op_9xy0(chip8_t *chip8) {}
+
+void op_Annn(chip8_t *chip8) {}
+
+void op_Bnnn(chip8_t *chip8) {}
+
+void op_Cxkk(chip8_t *chip8) {}
+
+void op_Dxyn(chip8_t *chip8) {}
+
+void op_Ex9E(chip8_t *chip8) {}
+
+void op_ExA1(chip8_t *chip8) {}
+
+void op_Fx07(chip8_t *chip8) {}
+
+void op_Fx0A(chip8_t *chip8) {}
+
+void op_Fx15(chip8_t *chip8) {}
+
+void op_Fx18(chip8_t *chip8) {}
+
+void op_Fx1E(chip8_t *chip8) {}
+
+void op_Fx29(chip8_t *chip8) {}
+
+void op_Fx33(chip8_t *chip8) {}
+
+void op_Fx55(chip8_t *chip8) {}
+
+void op_Fx65(chip8_t *chip8) {}
+
+void cycle(chip8_t *chip8) {}
