@@ -118,7 +118,7 @@ bool get_display_pixel(chip8_t *chip8, int x, int y) { return false; }
 
 void set_display_pixel(chip8_t *chip8, int x, int y) {}
 
-void op_0nnn(chip8_t *chip8) {}
+void op_0nnn(chip8_t *chip8) { chip8->pc = chip8->opcode & 0x0FFFu; }
 
 // Set entire display buffer to 0
 void op_00E0(chip8_t *chip8) {
@@ -131,33 +131,139 @@ void op_00EE(chip8_t *chip8) {
   chip8->pc = chip8->stack[chip8->sp];
 }
 
-void op_1nnn(chip8_t *chip8) {}
+// JP addr
+void op_1nnn(chip8_t *chip8) {
+  uint16_t nnn = chip8->opcode & 0x0FFFu;
+  chip8->pc = nnn;
+}
 
-void op_2nnn(chip8_t *chip8) {}
+// Call subroutine at nnn
+void op_2nnn(chip8_t *chip8) {
+  uint16_t nnn = chip8->opcode & 0x0FFFu;
+  chip8->stack[chip8->sp] = chip8->pc;
+  ++chip8->sp;
+  chip8->pc = nnn;
+}
 
-void op3xkk(chip8_t *chip8) {}
+// SE Vx, byte
+void op3xkk(chip8_t *chip8) {
+  uint8_t Vx = (chip8->opcode & 0x0F00u) >> 8u;
+  // 3rd + 4th nibble - 0000 0000 1111 1111
+  uint8_t kk = chip8->opcode & 0x00FFu;
+  if (chip8->registers[Vx] == kk) {
+    chip8->pc += 2;
+  }
+}
 
-void op_4xkk(chip8_t *chip8) {}
+// SNE Vx, byte
+void op_4xkk(chip8_t *chip8) {
+  uint8_t Vx = (chip8->opcode & 0x0F00u) >> 8u;
+  // 3rd + 4th nibble - 0000 0000 1111 1111
+  uint8_t kk = chip8->opcode & 0x00FFu;
+  if (chip8->registers[Vx] != kk) {
+    chip8->pc += 2;
+  }
+}
 
-void op_5xy0(chip8_t *chip8) {}
+// SE Vx, Vy
+void op_5xy0(chip8_t *chip8) {
+  // 2nd nibble - 0000 1111 0000 0000
+  uint8_t Vx = (chip8->opcode & 0x0F00u) >> 8u;
+  // 3rd nibble - 0000 0000 1111 0000
+  uint8_t Vy = (chip8->opcode & 0x00F0u) >> 4u;
+  if (chip8->registers[Vx] == chip8->registers[Vy]) {
+    chip8->pc += 2;
+  }
+}
 
-void op_6xkk(chip8_t *chip8) {}
+// LD Vx, byte
+void op_6xkk(chip8_t *chip8) {
+  uint8_t Vx = (chip8->opcode & 0x0F00u) >> 8u;
+  // 3rd + 4th nibble - 0000 0000 1111 1111
+  uint8_t kk = chip8->opcode & 0x00FFu;
+  chip8->registers[Vx] = kk;
+}
 
-void op_7xkk(chip8_t *chip8) {}
+// ADD Vx, byte
+void op_7xkk(chip8_t *chip8) {
+  uint8_t Vx = (chip8->opcode & 0x0F00u) >> 8u;
+  uint8_t kk = chip8->opcode & 0x00FFu;
 
-void op_8xy0(chip8_t *chip8) {}
+  chip8->registers[Vx] += kk;
+}
 
-void op_8xy1(chip8_t *chip8) {}
+// LD Vx, Vy
+void op_8xy0(chip8_t *chip8) {
+  uint8_t Vx = (chip8->opcode & 0x0F00u) >> 8u;
+  uint8_t Vy = (chip8->opcode & 0x00F0u) >> 4u;
 
-void op_8xy2(chip8_t *chip8) {}
+  chip8->registers[Vx] = chip8->registers[Vy];
+}
 
-void op_8xy3(chip8_t *chip8) {}
+// OR Vx, Vy
+void op_8xy1(chip8_t *chip8) {
+  uint8_t Vx = (chip8->opcode & 0x0F00u) >> 8u;
+  uint8_t Vy = (chip8->opcode & 0x00F0u) >> 4u;
+  chip8->registers[Vx] |= chip8->registers[Vy];
+}
 
-void op_8xy4(chip8_t *chip8) {}
+// AND Vx, Vy
+void op_8xy2(chip8_t *chip8) {
+  uint8_t Vx = (chip8->opcode & 0x0F00u) >> 8u;
+  uint8_t Vy = (chip8->opcode & 0x00F0u) >> 4u;
+  chip8->registers[Vx] &= chip8->registers[Vy];
+}
 
-void op_8xy5(chip8_t *chip8) {}
+// XOR Vx, Vy
+void op_8xy3(chip8_t *chip8) {
+  uint8_t Vx = (chip8->opcode & 0x0F00u) >> 8u;
+  uint8_t Vy = (chip8->opcode & 0x00F0u) >> 4u;
+  chip8->registers[Vx] ^= chip8->registers[Vy];
+}
 
-void op_8xy6(chip8_t *chip8) {}
+// ADD Vx, Vy
+void op_8xy4(chip8_t *chip8) {
+  uint8_t Vx = (chip8->opcode & 0x0F00u) >> 8u;
+  uint8_t Vy = (chip8->opcode & 0x00F0u) >> 4u;
+
+  uint16_t sum = chip8->registers[Vx] + chip8->registers[Vy];
+
+  // VF = OxF - special register for carry
+  if (sum > 0xFFu) {
+    chip8->registers[0xF] = 1; // Set carry flag
+  } else {
+    chip8->registers[0xF] = 0; // Clear carry flag
+  }
+
+  chip8->registers[Vx] = (uint8_t)(sum & 0xFFu);
+}
+
+// SUB Vx, Vy
+void op_8xy5(chip8_t *chip8) {
+  uint8_t Vx = (chip8->opcode & 0x0F00u) >> 8u;
+  uint8_t Vy = (chip8->opcode & 0x00F0u) >> 4u;
+
+  uint16_t sum = chip8->registers[Vx] - chip8->registers[Vy];
+
+  if (chip8->registers[Vx] > chip8->registers[Vy]) {
+    chip8->registers[0xF] = 1; // Set borrow flag
+  } else {
+    chip8->registers[0xF] = 0; // Clear borrow flag
+  }
+
+  chip8->registers[Vx] = chip8->registers[Vx] - chip8->registers[Vy];
+}
+
+// SHR Vx {, Vy}
+void op_8xy6(chip8_t *chip8) {
+  uint8_t Vx = (chip8->opcode & 0x0F00u) >> 8u;
+  // 0x1u = 0001
+  // VF = Vx & 0x1u
+  chip8->registers[0xF] = chip8->registers[Vx] & 0x01u; // LSB to VF
+
+  // Right shift Vx by 1 (div by 2)
+  chip8->registers[Vx] >>= 1u;
+}
 
 void op_8xy7(chip8_t *chip8) {}
 
