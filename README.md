@@ -1,98 +1,88 @@
-# CHIP-8 Emulator
+# Chip-8 Emulator
 
-A CHIP-8 emulator written in C.
-
-## Overview
-
-CHIP-8 is a simple interpreted language used on vintage computers and consoles. This emulator allows you to run classic CHIP-8 games and programs.
+A simple Chip-8 emulator written in C.
 
 ## Features
 
-- CPU emulation
-- Graphics rendering (using SDL2)
-- Keyboard input
-- ROM loading
+- Interprets and runs Chip-8 ROMs (in-progress)
+- Keyboard input mapping (in-progress)
+- Graphics rendering (in-progress)
+- Sound support (in-progress)
+- Accurate timing and instruction emulation (in-progress)
 
-## Requirements
+### Using Nix
 
-- C compiler (GCC or Clang)
-- SDL2 library
+The recommended way to manage dependencies is with [Nix](https://nixos.org/) and [direnv](https://direnv.net/), which together provide a reproducible development environment.
 
-## Build Instructions
+1. **Install Nix:**  
+   Follow the instructions at the [Determinate Nix Docs](https://docs.determinate.systems/determinate-nix/) or the [nix installer repository](https://github.com/DeterminateSystems/nix-installer).
 
-You can run the CHIP-8 emulator using either Nix (with or without flakes) or your system environment.
+2. **Enable the development environment:**
+   - If you use direnv, run:
 
-### Using Nix (Recommended)
+     ```sh
+     direnv allow
+     ```
 
-#### With Flakes Enabled
+     This will automatically load the development environment whenever you enter the project directory.
 
-1. Install [Nix](https://nixos.org/download.html) and [direnv](https://direnv.net/).
-2. In the project directory, run:
+   - Without direnv, you can enter the environment manually:
+     - For Nix Flake users:
 
-   ```
-   direnv allow
-   ```
+       ```sh
+       nix develop
+       ```
 
-   This will automatically set up the development environment.
+     - For classic Nix shell users:
 
-3. Or, manually enter the shell:
+       ```sh
+       nix shell
+       ```
 
-   ```
-   nix develop
-   ```
+### Without Nix
 
-#### Without Flakes
+Ensure you have a C compiler (e.g., `gcc`) installed.
 
-1. Install Nix.
-2. Enter the shell using:
+To build the emulator, run:
 
-   ```
-   nix-shell
-   ```
+```sh
+make
+```
 
-### macOS/Darwin
+Or manually compile:
 
-1. Install dependencies:
+```sh
+gcc -o chip8-emulator src/*.c -Iinclude
+```
 
-   ```
-   brew install sdl2
-   ```
+## Usage
 
-2. Build the project:
+```sh
+./chip8-emulator [--rom filename | --r filename | filename ]
+```
 
-   ```
-   make
-   ```
+You can specify the ROM file as a positional argument or with `--rom`/`--r`:
 
-3. Run the emulator:
+Examples:
 
-   ```
-   ./chip8-emulator <ROM file>
-   ```
+```sh
+./chip8-emulator PONG.ch8
+./chip8-emulator --file PONG.ch8
+./chip8-emulator --filename PONG.ch8
+```
 
-### Linux
+## Controls (in-progress)
 
-1. Install dependencies:
-
-   ```
-   sudo apt-get install build-essential libsdl2-dev
-   ```
-
-2. Build the project:
-
-   ```
-   make
-   ```
-
-3. Run the emulator:
-
-   ```
-   ./chip8-emulator <ROM file>
-   ```
+- Map your keyboard keys to Chip-8 hex keypad as described in your implementation.
 
 ## License
 
-MIT
+MIT License. See [LICENSE](LICENSE) for details.
+
+## References
+
+- [Cowgod’s Chip-8 Technical Reference](http://devernay.free.fr/hacks/chip8/C8TECH10.HTM)
+- [Wikipedia: Chip-8](https://en.wikipedia.org/wiki/CHIP-8)
 
 ```
 
