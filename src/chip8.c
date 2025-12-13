@@ -318,7 +318,36 @@ void op_Cxkk(chip8_t *chip8) {
 }
 
 // DRW Vx, Vy, nibble
-void op_Dxyn(chip8_t *chip8) {}
+void op_Dxyn(chip8_t *chip8) {
+  uint8_t Vx = chip8->opcode & 0x0F00u >> 8u;
+  uint8_t Vy = chip8->opcode & 0x00F0u >> 4u;
+  // n (last nibble)
+  uint8_t height = chip8->opcode & 0x000Fu;
+
+  uint8_t xPos = chip8->registers[Vx] % DISPLAY_WIDTH;
+  uint8_t yPos = chip8->registers[Vy] % DISPLAY_HEIGHT;
+
+  chip8->registers[0xF] = 0; // Reset collision flag
+
+  for (unsigned int i = 0; i < height; ++i) {
+    uint8_t spriteByte = chip8->memory[chip8->index + i];
+    for (unsigned int j = 0; j < 8; ++j) {
+      uint8_t spritePixel = spriteByte & (0x80 >> j);
+      uint32_t *screenPixel =
+          &chip8->display[(yPos + i) * DISPLAY_WIDTH + (xPos + j)];
+
+      // Sprite Pixel is on
+      if (spritePixel) {
+        // Screen Pixel is on - collision
+        if (*screenPixel == 0xFFFFFFFF) {
+          chip8->registers[0xF] = 1; // Set collision flag
+        }
+        // XOR the pixel onto the display
+        *screenPixel ^= 0xFFFFFFFF;
+      }
+    }
+  }
+}
 
 void op_Ex9E(chip8_t *chip8) {}
 
