@@ -349,10 +349,25 @@ void op_Dxyn(chip8_t *chip8) {
   }
 }
 
-void op_Ex9E(chip8_t *chip8) {}
+// SKP Vx
+void op_Ex9E(chip8_t *chip8) {
+  uint8_t Vx = (chip8->opcode & 0x0F00u) >> 8u;
+  uint8_t instr = chip8->registers[Vx];
+  if (chip8->keypad[instr]) {
+    chip8->pc += 2;
+  }
+}
 
-void op_ExA1(chip8_t *chip8) {}
+// SKNP Vx
+void op_ExA1(chip8_t *chip8) {
+  uint8_t Vx = (chip8->opcode & 0x0F00u) >> 8u;
+  uint8_t instr = chip8->registers[Vx];
+  if (!chip8->keypad[instr]) {
+    chip8->pc += 2;
+  }
+}
 
+// LD Vx, DT
 void op_Fx07(chip8_t *chip8) {}
 
 void op_Fx0A(chip8_t *chip8) {}
