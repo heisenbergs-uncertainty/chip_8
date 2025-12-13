@@ -415,18 +415,65 @@ void op_Fx0A(chip8_t *chip8) {
   }
 }
 
-void op_Fx15(chip8_t *chip8) {}
+// LD DT, Vx
+void op_Fx15(chip8_t *chip8) {
+  uint8_t Vx = (chip8->opcode & 0x0F00u) >> 8u;
 
-void op_Fx18(chip8_t *chip8) {}
+  chip8->delay_timer = chip8->registers[Vx];
+}
 
-void op_Fx1E(chip8_t *chip8) {}
+// LD ST, Vx
+void op_Fx18(chip8_t *chip8) {
+  uint8_t Vx = (chip8->opcode & 0x0F00u) >> 8u;
 
-void op_Fx29(chip8_t *chip8) {}
+  chip8->sound_timer = chip8->registers[Vx];
+}
 
-void op_Fx33(chip8_t *chip8) {}
+// ADD I, Vx
+void op_Fx1E(chip8_t *chip8) {
+  uint8_t Vx = (chip8->opcode & 0x0F00u) >> 8u;
 
-void op_Fx55(chip8_t *chip8) {}
+  chip8->index += chip8->registers[Vx];
+}
 
-void op_Fx65(chip8_t *chip8) {}
+// LD F, Vx
+void op_Fx29(chip8_t *chip8) {
+  uint8_t Vx = (chip8->opcode & 0x0F00u) >> 8u;
+
+  uint8_t digit = chip8->registers[Vx];
+  chip8->index = FONTSET_START_ADDRESS + (digit * 5);
+}
+
+// LD B, Vx
+void op_Fx33(chip8_t *chip8) {
+  uint8_t Vx = (chip8->opcode & 0x0F00u) >> 8u;
+  uint8_t digit = chip8->registers[Vx];
+
+  chip8->memory[chip8->index] = digit % 10;
+  digit /= 10;
+
+  chip8->memory[chip8->index + 1] = digit % 10;
+  digit /= 10;
+
+  chip8->memory[chip8->index + 2] = digit % 10;
+}
+
+// LD [I], Vx
+void op_Fx55(chip8_t *chip8) {
+  uint8_t Vx = (chip8->opcode & 0x0F00u) >> 8u;
+
+  for (int i = 0; i < Vx; ++i) {
+    chip8->memory[chip8->index + i] = chip8->registers[i];
+  }
+}
+
+// LD  Vx, [I]
+void op_Fx65(chip8_t *chip8) {
+  uint8_t Vx = (chip8->opcode & 0x0F00u) >> 8u;
+
+  for (int i = 0; i < Vx; ++i) {
+    chip8->registers[i] = chip8->memory[chip8->index + i];
+  }
+}
 
 void cycle(chip8_t *chip8) {}
