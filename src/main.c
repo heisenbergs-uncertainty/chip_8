@@ -1,5 +1,7 @@
+#include "chip8.h"
 #include <stdio.h>
 #include <string.h>
+#include <wchar.h>
 
 void handle_help() {
   printf("Usage: chip8_emulator [options]\n");
@@ -42,7 +44,10 @@ char *handle_params(int argc, char *argv[]) {
 
 int main(int argc, char *argv[]) {
   char *filename = handle_params(argc, argv);
+  chip8_t *chip8 = {};
   if (filename != NULL) {
+    init_chip8(chip8);
+
     // Load and run the ROM file
     printf("Loading ROM: %s\n", filename);
     // Add ROM loading and execution logic here

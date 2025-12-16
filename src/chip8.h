@@ -82,7 +82,7 @@ extern opcodehandler_t opcode_table[16];
  *
  * @param chip8 Pointer to the CHIP-8 state structure.
  */
-void init(chip8_t *chip8);
+void *init_chip8(chip8_t *chip8);
 
 /**
  * @brief Set the current opcode for the CHIP-8 system.

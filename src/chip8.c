@@ -55,51 +55,6 @@ static inline uint8_t rng_byte(void) {
   return (uint8_t)(rng_state);
 }
 
-void init(chip8_t *chip8) {
-  // Initialize PC at 0x200
-  chip8->pc = START_ADDRESS;
-  // Load Font set into memory
-  for (unsigned int i = 0; i < FONTSET_SIZE; ++i) {
-    chip8->memory[FONTSET_START_ADDRESS + i] = fontset[i];
-  }
-  rng_seed((uint32_t)time(NULL));
-}
-
-int32_t load_rom(chip8_t *chip8, const char *filename) {
-  FILE *fptr = fopen(filename, "rb");
-  if (fptr == NULL) {
-    return -1;
-  }
-
-  // Get file size
-  fseek(fptr, 0, SEEK_END);
-  long file_size = ftell(fptr);
-  fseek(fptr, 0, SEEK_SET);
-
-  // Check if ROM fits in memory (0x200 to 0xFFF = 3584 bytes max)
-  if (file_size > 4096 - START_ADDRESS) {
-    fclose(fptr);
-    return -1; // ROM too large
-  }
-
-  char *buffer = (char *)malloc((size_t)file_size);
-  if (buffer == NULL) {
-    fclose(fptr);
-    return -1; // Memory allocation failed
-  }
-
-  size_t bytes_read = fread(buffer, 1, (size_t)file_size, fptr);
-  fclose(fptr);
-
-  // Copy ROM data into Chip-8 memory starting at 0x200
-  for (long i = 0; i < file_size; ++i) {
-    chip8->memory[START_ADDRESS + i] = (unsigned char)buffer[i];
-  }
-  free(buffer);
-
-  return 0;
-}
-
 void set_opcode(chip8_t *chip8) {
   uint8_t lhsByte = chip8->memory[chip8->pc];
   uint8_t rhsByte = chip8->memory[chip8->pc + 1];
@@ -605,6 +560,54 @@ void op_Fx__(chip8_t *chip8) {
   default: /* Unknown 0xFx** opcode */
     break;
   }
+}
+
+void *init_chip8(chip8_t *chip8) {
+  // Initialize PC at 0x200
+  chip8->pc = START_ADDRESS;
+  // Load Font set into memory
+  for (unsigned int i = 0; i < FONTSET_SIZE; ++i) {
+    chip8->memory[FONTSET_START_ADDRESS + i] = fontset[i];
+  }
+  rng_seed((uint32_t)time(NULL));
+  init_opcode_table();
+
+  return chip8;
+}
+
+int32_t load_rom(chip8_t *chip8, const char *filename) {
+  FILE *fptr = fopen(filename, "rb");
+  if (fptr == NULL) {
+    return -1;
+  }
+
+  // Get file size
+  fseek(fptr, 0, SEEK_END);
+  long file_size = ftell(fptr);
+  fseek(fptr, 0, SEEK_SET);
+
+  // Check if ROM fits in memory (0x200 to 0xFFF = 3584 bytes max)
+  if (file_size > 4096 - START_ADDRESS) {
+    fclose(fptr);
+    return -1; // ROM too large
+  }
+
+  char *buffer = (char *)malloc((size_t)file_size);
+  if (buffer == NULL) {
+    fclose(fptr);
+    return -1; // Memory allocation failed
+  }
+
+  size_t bytes_read = fread(buffer, 1, (size_t)file_size, fptr);
+  fclose(fptr);
+
+  // Copy ROM data into Chip-8 memory starting at 0x200
+  for (long i = 0; i < file_size; ++i) {
+    chip8->memory[START_ADDRESS + i] = (unsigned char)buffer[i];
+  }
+  free(buffer);
+
+  return 0;
 }
 
 void cycle(chip8_t *chip8) {
