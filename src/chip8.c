@@ -476,4 +476,158 @@ void op_Fx65(chip8_t *chip8) {
   }
 }
 
-void cycle(chip8_t *chip8) {}
+opcodehandler_t opcode_table[16];
+
+void op_0xxx(chip8_t *chip8);
+void op_8xy_(chip8_t *chip8); // Handles all 0x8xy* opcodes
+void op_Ex__(chip8_t *chip8); // Handles all 0xEx** opcodes
+void op_Fx__(chip8_t *chip8); // Handles all 0xFx** opcodes
+
+void init_opcode_table(void) {
+  opcode_table[0x0] = op_0xxx; // 0x0--- (SYS, CLS, RET)
+  opcode_table[0x1] = op_1nnn; // 0x1nnn (JP addr)
+  opcode_table[0x2] = op_2nnn; // 0x2nnn (CALL addr)
+  opcode_table[0x3] = op3xkk;  // 0x3xkk (SE Vx, byte)
+  opcode_table[0x4] = op_4xkk; // 0x4xkk (SNE Vx, byte)
+  opcode_table[0x5] = op_5xy0; // 0x5xy0 (SE Vx, Vy)
+  opcode_table[0x6] = op_6xkk; // 0x6xkk (LD Vx, byte)
+  opcode_table[0x7] = op_7xkk; // 0x7xkk (ADD Vx, byte)
+  opcode_table[0x8] =
+      op_8xy_; // 0x8xy* (arithmetic/logical, handled by op_8xy_)
+  opcode_table[0x9] = op_9xy0; // 0x9xy0 (SNE Vx, Vy)
+  opcode_table[0xA] = op_Annn; // 0xAnnn (LD I, addr)
+  opcode_table[0xB] = op_Bnnn; // 0xBnnn (JP V0, addr)
+  opcode_table[0xC] = op_Cxkk; // 0xCxkk (RND Vx, byte)
+  opcode_table[0xD] = op_Dxyn; // 0xDxyn (DRW Vx, Vy, nibble)
+  opcode_table[0xE] = op_Ex__; // 0xEx** (keypad, handled by op_Ex__)
+  opcode_table[0xF] = op_Fx__; // 0xFx** (misc, handled by op_Fx__)
+}
+
+void op_0xxx(chip8_t *chip8) {
+  switch (chip8->opcode) {
+  case 0x00E0:
+    op_00E0(chip8);
+    break; // CLS
+  case 0x00EE:
+    op_00EE(chip8);
+    break; // RET
+  default:
+    op_0nnn(chip8);
+    break; // SYS addr
+  }
+}
+
+// Handles all 0x8xy* opcodes (arithmetic/logical)
+void op_8xy_(chip8_t *chip8) {
+  uint16_t opcode = chip8->opcode;
+  uint8_t n = opcode & 0x000F;
+  switch (n) {
+  case 0x0:
+    op_8xy0(chip8);
+    break;
+  case 0x1:
+    op_8xy1(chip8);
+    break;
+  case 0x2:
+    op_8xy2(chip8);
+    break;
+  case 0x3:
+    op_8xy3(chip8);
+    break;
+  case 0x4:
+    op_8xy4(chip8);
+    break;
+  case 0x5:
+    op_8xy5(chip8);
+    break;
+  case 0x6:
+    op_8xy6(chip8);
+    break;
+  case 0x7:
+    op_8xy7(chip8);
+    break;
+  case 0xE:
+    op_8xyE(chip8);
+    break;
+  default: /* Unknown 0x8xy* opcode */
+    break;
+  }
+}
+
+// Handles all 0xEx** opcodes (keypad)
+void op_Ex__(chip8_t *chip8) {
+  uint16_t opcode = chip8->opcode;
+  uint8_t kk = opcode & 0x00FF;
+  switch (kk) {
+  case 0x9E:
+    op_Ex9E(chip8);
+    break;
+  case 0xA1:
+    op_ExA1(chip8);
+    break;
+  default: /* Unknown 0xEx** opcode */
+    break;
+  }
+}
+
+// Handles all 0xFx** opcodes (misc)
+void op_Fx__(chip8_t *chip8) {
+  uint16_t opcode = chip8->opcode;
+  uint8_t kk = opcode & 0x00FF;
+  switch (kk) {
+  case 0x07:
+    op_Fx07(chip8);
+    break;
+  case 0x0A:
+    op_Fx0A(chip8);
+    break;
+  case 0x15:
+    op_Fx15(chip8);
+    break;
+  case 0x18:
+    op_Fx18(chip8);
+    break;
+  case 0x1E:
+    op_Fx1E(chip8);
+    break;
+  case 0x29:
+    op_Fx29(chip8);
+    break;
+  case 0x33:
+    op_Fx33(chip8);
+    break;
+  case 0x55:
+    op_Fx55(chip8);
+    break;
+  case 0x65:
+    op_Fx65(chip8);
+    break;
+  default: /* Unknown 0xFx** opcode */
+    break;
+  }
+}
+
+void cycle(chip8_t *chip8) {
+  // Call set_opcode for grabbing instr and incr pc
+  set_opcode(chip8);
+
+  // Grab correct function pointer from table with first nibble
+  opcodehandler_t handler = opcode_table[(chip8->opcode & 0xF000u) >> 12u];
+
+  // Check if function pointer is nil AKA invalid isntruction
+  if (handler)
+    handler(chip8);
+  else
+    // TODO: Better error handling for invalid isntruction
+    printf("Error handling instruction");
+
+  // Decrement delay timer if set
+  if (chip8->delay_timer > 0) {
+    --chip8->delay_timer;
+  }
+
+  // Decrement sound timer if set
+  if (chip8->sound_timer > 0) {
+    --chip8->sound_timer;
+  }
+}

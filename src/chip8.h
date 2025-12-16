@@ -75,6 +75,7 @@ typedef struct {
  * Each handler receives a pointer to the chip8_t state.
  */
 typedef void (*opcodehandler_t)(chip8_t *chip8);
+extern opcodehandler_t opcode_table[16];
 
 /**
  * @brief Initialize the CHIP-8 system state.
