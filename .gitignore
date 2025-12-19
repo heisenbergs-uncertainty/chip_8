@@ -1,5 +1,26 @@
-# Nix 
-.direnv
+# Nix
+.direnv/
 flake.lock
+result
+
+# Build artifacts
+build/
 *.o
+*.d
+*.out
+
+# Binary
 chip8-emulator
+
+# Editor/IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# macOS
+.DS_Store
+
+# Debug
+*.dSYM/
