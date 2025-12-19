@@ -1,6 +1,5 @@
 # Nix
 .direnv/
-flake.lock
 result
 
 # Build artifacts
