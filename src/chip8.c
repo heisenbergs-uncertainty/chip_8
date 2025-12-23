@@ -36,7 +36,8 @@ static uint32_t rng_state = 0x12345678;
  *
  * @param seed The seed value. If zero, it is replaced with 1.
  */
-static inline void rng_seed(uint32_t seed) {
+static inline void rng_seed(uint32_t seed)
+{
   if (seed == 0)
     seed = 1;
   rng_state = seed;
@@ -47,7 +48,8 @@ static inline void rng_seed(uint32_t seed) {
  *
  * @return uint8_t Random byte.
  */
-static inline uint8_t rng_byte(void) {
+static inline uint8_t rng_byte(void)
+{
   // Xorshift32
   rng_state ^= rng_state << 13;
   rng_state ^= rng_state >> 17;
@@ -55,7 +57,8 @@ static inline uint8_t rng_byte(void) {
   return (uint8_t)(rng_state);
 }
 
-void set_opcode(chip8_t *chip8) {
+void set_opcode(chip8_t *chip8)
+{
   uint8_t lhsByte = chip8->memory[chip8->pc];
   uint8_t rhsByte = chip8->memory[chip8->pc + 1];
 
@@ -67,33 +70,44 @@ void set_opcode(chip8_t *chip8) {
   chip8->opcode = lhsByte << 8 | rhsByte;
 }
 
-void update_timers(chip8_t *chip8) {}
+void update_timers(chip8_t *chip8)
+{
+  if (chip8->delay_timer > 0)
+  {
+    --chip8->delay_timer;
+  }
 
-bool get_display_pixel(chip8_t *chip8, int x, int y) { return false; }
-
-void set_display_pixel(chip8_t *chip8, int x, int y) {}
+  if (chip8->sound_timer > 0)
+  {
+    --chip8->sound_timer;
+  }
+}
 
 void op_0nnn(chip8_t *chip8) { chip8->pc = chip8->opcode & 0x0FFFu; }
 
 // Set entire display buffer to 0
-void op_00E0(chip8_t *chip8) {
+void op_00E0(chip8_t *chip8)
+{
   memset(chip8->display, 0, sizeof(chip8->display));
 }
 
 // RETURN from subroutine
-void op_00EE(chip8_t *chip8) {
+void op_00EE(chip8_t *chip8)
+{
   --chip8->sp;
   chip8->pc = chip8->stack[chip8->sp];
 }
 
 // JP addr
-void op_1nnn(chip8_t *chip8) {
+void op_1nnn(chip8_t *chip8)
+{
   uint16_t nnn = chip8->opcode & 0x0FFFu;
   chip8->pc = nnn;
 }
 
 // Call subroutine at nnn
-void op_2nnn(chip8_t *chip8) {
+void op_2nnn(chip8_t *chip8)
+{
   uint16_t nnn = chip8->opcode & 0x0FFFu;
   chip8->stack[chip8->sp] = chip8->pc;
   ++chip8->sp;
@@ -101,38 +115,45 @@ void op_2nnn(chip8_t *chip8) {
 }
 
 // SE Vx, byte
-void op3xkk(chip8_t *chip8) {
+void op3xkk(chip8_t *chip8)
+{
   uint8_t Vx = (chip8->opcode & 0x0F00u) >> 8u;
   // 3rd + 4th nibble - 0000 0000 1111 1111
   uint8_t kk = chip8->opcode & 0x00FFu;
-  if (chip8->registers[Vx] == kk) {
+  if (chip8->registers[Vx] == kk)
+  {
     chip8->pc += 2;
   }
 }
 
 // SNE Vx, byte
-void op_4xkk(chip8_t *chip8) {
+void op_4xkk(chip8_t *chip8)
+{
   uint8_t Vx = (chip8->opcode & 0x0F00u) >> 8u;
   // 3rd + 4th nibble - 0000 0000 1111 1111
   uint8_t kk = chip8->opcode & 0x00FFu;
-  if (chip8->registers[Vx] != kk) {
+  if (chip8->registers[Vx] != kk)
+  {
     chip8->pc += 2;
   }
 }
 
 // SE Vx, Vy
-void op_5xy0(chip8_t *chip8) {
+void op_5xy0(chip8_t *chip8)
+{
   // 2nd nibble - 0000 1111 0000 0000
   uint8_t Vx = (chip8->opcode & 0x0F00u) >> 8u;
   // 3rd nibble - 0000 0000 1111 0000
   uint8_t Vy = (chip8->opcode & 0x00F0u) >> 4u;
-  if (chip8->registers[Vx] == chip8->registers[Vy]) {
+  if (chip8->registers[Vx] == chip8->registers[Vy])
+  {
     chip8->pc += 2;
   }
 }
 
 // LD Vx, byte
-void op_6xkk(chip8_t *chip8) {
+void op_6xkk(chip8_t *chip8)
+{
   uint8_t Vx = (chip8->opcode & 0x0F00u) >> 8u;
   // 3rd + 4th nibble - 0000 0000 1111 1111
   uint8_t kk = chip8->opcode & 0x00FFu;
@@ -140,7 +161,8 @@ void op_6xkk(chip8_t *chip8) {
 }
 
 // ADD Vx, byte
-void op_7xkk(chip8_t *chip8) {
+void op_7xkk(chip8_t *chip8)
+{
   uint8_t Vx = (chip8->opcode & 0x0F00u) >> 8u;
   uint8_t kk = chip8->opcode & 0x00FFu;
 
@@ -148,7 +170,8 @@ void op_7xkk(chip8_t *chip8) {
 }
 
 // LD Vx, Vy
-void op_8xy0(chip8_t *chip8) {
+void op_8xy0(chip8_t *chip8)
+{
   uint8_t Vx = (chip8->opcode & 0x0F00u) >> 8u;
   uint8_t Vy = (chip8->opcode & 0x00F0u) >> 4u;
 
@@ -156,37 +179,44 @@ void op_8xy0(chip8_t *chip8) {
 }
 
 // OR Vx, Vy
-void op_8xy1(chip8_t *chip8) {
+void op_8xy1(chip8_t *chip8)
+{
   uint8_t Vx = (chip8->opcode & 0x0F00u) >> 8u;
   uint8_t Vy = (chip8->opcode & 0x00F0u) >> 4u;
   chip8->registers[Vx] |= chip8->registers[Vy];
 }
 
 // AND Vx, Vy
-void op_8xy2(chip8_t *chip8) {
+void op_8xy2(chip8_t *chip8)
+{
   uint8_t Vx = (chip8->opcode & 0x0F00u) >> 8u;
   uint8_t Vy = (chip8->opcode & 0x00F0u) >> 4u;
   chip8->registers[Vx] &= chip8->registers[Vy];
 }
 
 // XOR Vx, Vy
-void op_8xy3(chip8_t *chip8) {
+void op_8xy3(chip8_t *chip8)
+{
   uint8_t Vx = (chip8->opcode & 0x0F00u) >> 8u;
   uint8_t Vy = (chip8->opcode & 0x00F0u) >> 4u;
   chip8->registers[Vx] ^= chip8->registers[Vy];
 }
 
 // ADD Vx, Vy
-void op_8xy4(chip8_t *chip8) {
+void op_8xy4(chip8_t *chip8)
+{
   uint8_t Vx = (chip8->opcode & 0x0F00u) >> 8u;
   uint8_t Vy = (chip8->opcode & 0x00F0u) >> 4u;
 
   uint16_t sum = chip8->registers[Vx] + chip8->registers[Vy];
 
   // VF = OxF - special register for carry
-  if (sum > 0xFFu) {
+  if (sum > 0xFFu)
+  {
     chip8->registers[0xF] = 1; // Set carry flag
-  } else {
+  }
+  else
+  {
     chip8->registers[0xF] = 0; // Clear carry flag
   }
 
@@ -194,15 +224,19 @@ void op_8xy4(chip8_t *chip8) {
 }
 
 // SUB Vx, Vy
-void op_8xy5(chip8_t *chip8) {
+void op_8xy5(chip8_t *chip8)
+{
   uint8_t Vx = (chip8->opcode & 0x0F00u) >> 8u;
   uint8_t Vy = (chip8->opcode & 0x00F0u) >> 4u;
 
   uint16_t sum = chip8->registers[Vx] - chip8->registers[Vy];
 
-  if (chip8->registers[Vx] > chip8->registers[Vy]) {
+  if (chip8->registers[Vx] > chip8->registers[Vy])
+  {
     chip8->registers[0xF] = 1; // Set borrow flag
-  } else {
+  }
+  else
+  {
     chip8->registers[0xF] = 0; // Clear borrow flag
   }
 
@@ -210,7 +244,8 @@ void op_8xy5(chip8_t *chip8) {
 }
 
 // SHR Vx {, Vy}
-void op_8xy6(chip8_t *chip8) {
+void op_8xy6(chip8_t *chip8)
+{
   uint8_t Vx = (chip8->opcode & 0x0F00u) >> 8u;
   // 0x1u = 0001
   // VF = Vx & 0x1u
@@ -221,20 +256,25 @@ void op_8xy6(chip8_t *chip8) {
 }
 
 // SUBN Vx, Vy
-void op_8xy7(chip8_t *chip8) {
+void op_8xy7(chip8_t *chip8)
+{
   uint8_t Vx = (chip8->opcode & 0x0F00u) >> 8u;
   uint8_t Vy = (chip8->opcode & 0x00F0u) >> 4u;
 
-  if (chip8->registers[Vy] > chip8->registers[Vx]) {
+  if (chip8->registers[Vy] > chip8->registers[Vx])
+  {
     chip8->registers[0xF] = 1; // Set borrow flag
-  } else {
+  }
+  else
+  {
     chip8->registers[0xF] = 0; // Clear borrow flag
   }
   chip8->registers[Vx] = chip8->registers[Vy] - chip8->registers[Vx];
 }
 
 // SHL Vx {, Vy}
-void op_8xyE(chip8_t *chip8) {
+void op_8xyE(chip8_t *chip8)
+{
   uint8_t Vx = (chip8->opcode & 0x0F00u) >> 8u;
 
   chip8->registers[0xF] = (chip8->registers[Vx] & 0x80u) >> 7u; // MSB to VF
@@ -243,37 +283,43 @@ void op_8xyE(chip8_t *chip8) {
 }
 
 // SNE Vx, Vy
-void op_9xy0(chip8_t *chip8) {
+void op_9xy0(chip8_t *chip8)
+{
   uint8_t Vx = (chip8->opcode & 0x0F00u) >> 8u;
   uint8_t Vy = (chip8->opcode & 0x00F0u) >> 4u;
 
-  if (chip8->registers[Vx] != chip8->registers[Vy]) {
+  if (chip8->registers[Vx] != chip8->registers[Vy])
+  {
     chip8->pc += 2;
   }
 }
 
 // LD I, addr
-void op_Annn(chip8_t *chip8) {
+void op_Annn(chip8_t *chip8)
+{
   uint16_t nnn = chip8->opcode & 0x0FFFu;
   chip8->index = nnn;
 }
 
 // JP V0, addr
-void op_Bnnn(chip8_t *chip8) {
+void op_Bnnn(chip8_t *chip8)
+{
   uint16_t nnn = chip8->opcode & 0x0FFFu;
   chip8->pc = nnn + chip8->registers[0];
 }
 
 // RND Vx, byte
-void op_Cxkk(chip8_t *chip8) {
-  int8_t Vx = (chip8->opcode & 0x0F00u) >> 8u;
-  int8_t kk = chip8->opcode & 0x00FFu;
+void op_Cxkk(chip8_t *chip8)
+{
+  uint8_t Vx = (chip8->opcode & 0x0F00u) >> 8u;
+  uint8_t kk = chip8->opcode & 0x00FFu;
 
   chip8->registers[Vx] = rng_byte() & kk;
 }
 
 // DRW Vx, Vy, nibble
-void op_Dxyn(chip8_t *chip8) {
+void op_Dxyn(chip8_t *chip8)
+{
   uint8_t Vx = chip8->opcode & 0x0F00u >> 8u;
   uint8_t Vy = chip8->opcode & 0x00F0u >> 4u;
   // n (last nibble)
@@ -284,17 +330,21 @@ void op_Dxyn(chip8_t *chip8) {
 
   chip8->registers[0xF] = 0; // Reset collision flag
 
-  for (unsigned int i = 0; i < height; ++i) {
+  for (unsigned int i = 0; i < height; ++i)
+  {
     uint8_t spriteByte = chip8->memory[chip8->index + i];
-    for (unsigned int j = 0; j < 8; ++j) {
+    for (unsigned int j = 0; j < 8; ++j)
+    {
       uint8_t spritePixel = spriteByte & (0x80 >> j);
       uint32_t *screenPixel =
           &chip8->display[(yPos + i) * DISPLAY_WIDTH + (xPos + j)];
 
       // Sprite Pixel is on
-      if (spritePixel) {
+      if (spritePixel)
+      {
         // Screen Pixel is on - collision
-        if (*screenPixel == 0xFFFFFFFF) {
+        if (*screenPixel == 0xFFFFFFFF)
+        {
           chip8->registers[0xF] = 1; // Set collision flag
         }
         // XOR the pixel onto the display
@@ -305,94 +355,137 @@ void op_Dxyn(chip8_t *chip8) {
 }
 
 // SKP Vx
-void op_Ex9E(chip8_t *chip8) {
+void op_Ex9E(chip8_t *chip8)
+{
   uint8_t Vx = (chip8->opcode & 0x0F00u) >> 8u;
   uint8_t instr = chip8->registers[Vx];
-  if (chip8->keypad[instr]) {
+  if (chip8->keypad[instr])
+  {
     chip8->pc += 2;
   }
 }
 
 // SKNP Vx
-void op_ExA1(chip8_t *chip8) {
+void op_ExA1(chip8_t *chip8)
+{
   uint8_t Vx = (chip8->opcode & 0x0F00u) >> 8u;
   uint8_t instr = chip8->registers[Vx];
-  if (!chip8->keypad[instr]) {
+  if (!chip8->keypad[instr])
+  {
     chip8->pc += 2;
   }
 }
 
 // LD Vx, DT
-void op_Fx07(chip8_t *chip8) {
+void op_Fx07(chip8_t *chip8)
+{
   uint8_t Vx = (chip8->opcode & 0x0F00u) >> 8u;
   chip8->registers[Vx] = chip8->delay_timer;
 }
 
 // LD Vx, K
-void op_Fx0A(chip8_t *chip8) {
+void op_Fx0A(chip8_t *chip8)
+{
   uint8_t Vx = (chip8->opcode & 0x0F00u) >> 8u;
 
-  if (chip8->keypad[0]) {
+  if (chip8->keypad[0])
+  {
     chip8->registers[Vx] = 0;
-  } else if (chip8->keypad[1]) {
+  }
+  else if (chip8->keypad[1])
+  {
     chip8->registers[Vx] = 1;
-  } else if (chip8->keypad[2]) {
+  }
+  else if (chip8->keypad[2])
+  {
     chip8->registers[Vx] = 2;
-  } else if (chip8->keypad[3]) {
+  }
+  else if (chip8->keypad[3])
+  {
     chip8->registers[Vx] = 3;
-  } else if (chip8->keypad[4]) {
+  }
+  else if (chip8->keypad[4])
+  {
     chip8->registers[Vx] = 4;
-  } else if (chip8->keypad[5]) {
+  }
+  else if (chip8->keypad[5])
+  {
     chip8->registers[Vx] = 5;
-  } else if (chip8->keypad[6]) {
+  }
+  else if (chip8->keypad[6])
+  {
     chip8->registers[Vx] = 6;
-  } else if (chip8->keypad[7]) {
+  }
+  else if (chip8->keypad[7])
+  {
     chip8->registers[Vx] = 7;
-  } else if (chip8->keypad[8]) {
+  }
+  else if (chip8->keypad[8])
+  {
     chip8->registers[Vx] = 8;
-  } else if (chip8->keypad[9]) {
+  }
+  else if (chip8->keypad[9])
+  {
     chip8->registers[Vx] = 9;
-  } else if (chip8->keypad[10]) {
+  }
+  else if (chip8->keypad[10])
+  {
     chip8->registers[Vx] = 10;
-  } else if (chip8->keypad[11]) {
+  }
+  else if (chip8->keypad[11])
+  {
     chip8->registers[Vx] = 11;
-  } else if (chip8->keypad[12]) {
+  }
+  else if (chip8->keypad[12])
+  {
     chip8->registers[Vx] = 12;
-  } else if (chip8->keypad[13]) {
+  }
+  else if (chip8->keypad[13])
+  {
     chip8->registers[Vx] = 13;
-  } else if (chip8->keypad[14]) {
+  }
+  else if (chip8->keypad[14])
+  {
     chip8->registers[Vx] = 14;
-  } else if (chip8->keypad[15]) {
+  }
+  else if (chip8->keypad[15])
+  {
     chip8->registers[Vx] = 15;
-  } else {
+  }
+  else
+  {
     // No key pressed, repeat this instruction
     chip8->pc -= 2;
   }
 }
 
 // LD DT, Vx
-void op_Fx15(chip8_t *chip8) {
+void op_Fx15(chip8_t *chip8)
+{
   uint8_t Vx = (chip8->opcode & 0x0F00u) >> 8u;
 
   chip8->delay_timer = chip8->registers[Vx];
 }
 
 // LD ST, Vx
-void op_Fx18(chip8_t *chip8) {
+void op_Fx18(chip8_t *chip8)
+{
   uint8_t Vx = (chip8->opcode & 0x0F00u) >> 8u;
 
   chip8->sound_timer = chip8->registers[Vx];
 }
 
 // ADD I, Vx
-void op_Fx1E(chip8_t *chip8) {
+void op_Fx1E(chip8_t *chip8)
+{
   uint8_t Vx = (chip8->opcode & 0x0F00u) >> 8u;
 
   chip8->index += chip8->registers[Vx];
 }
 
 // LD F, Vx
-void op_Fx29(chip8_t *chip8) {
+void op_Fx29(chip8_t *chip8)
+{
   uint8_t Vx = (chip8->opcode & 0x0F00u) >> 8u;
 
   uint8_t digit = chip8->registers[Vx];
@@ -400,7 +493,8 @@ void op_Fx29(chip8_t *chip8) {
 }
 
 // LD B, Vx
-void op_Fx33(chip8_t *chip8) {
+void op_Fx33(chip8_t *chip8)
+{
   uint8_t Vx = (chip8->opcode & 0x0F00u) >> 8u;
   uint8_t digit = chip8->registers[Vx];
 
@@ -414,19 +508,23 @@ void op_Fx33(chip8_t *chip8) {
 }
 
 // LD [I], Vx
-void op_Fx55(chip8_t *chip8) {
+void op_Fx55(chip8_t *chip8)
+{
   uint8_t Vx = (chip8->opcode & 0x0F00u) >> 8u;
 
-  for (int i = 0; i < Vx; ++i) {
+  for (int i = 0; i < Vx; ++i)
+  {
     chip8->memory[chip8->index + i] = chip8->registers[i];
   }
 }
 
 // LD  Vx, [I]
-void op_Fx65(chip8_t *chip8) {
+void op_Fx65(chip8_t *chip8)
+{
   uint8_t Vx = (chip8->opcode & 0x0F00u) >> 8u;
 
-  for (int i = 0; i < Vx; ++i) {
+  for (int i = 0; i < Vx; ++i)
+  {
     chip8->registers[i] = chip8->memory[chip8->index + i];
   }
 }
@@ -438,7 +536,8 @@ void op_8xy_(chip8_t *chip8); // Handles all 0x8xy* opcodes
 void op_Ex__(chip8_t *chip8); // Handles all 0xEx** opcodes
 void op_Fx__(chip8_t *chip8); // Handles all 0xFx** opcodes
 
-void init_opcode_table(void) {
+void init_opcode_table(void)
+{
   opcode_table[0x0] = op_0xxx; // 0x0--- (SYS, CLS, RET)
   opcode_table[0x1] = op_1nnn; // 0x1nnn (JP addr)
   opcode_table[0x2] = op_2nnn; // 0x2nnn (CALL addr)
@@ -448,7 +547,7 @@ void init_opcode_table(void) {
   opcode_table[0x6] = op_6xkk; // 0x6xkk (LD Vx, byte)
   opcode_table[0x7] = op_7xkk; // 0x7xkk (ADD Vx, byte)
   opcode_table[0x8] =
-      op_8xy_; // 0x8xy* (arithmetic/logical, handled by op_8xy_)
+      op_8xy_;                 // 0x8xy* (arithmetic/logical, handled by op_8xy_)
   opcode_table[0x9] = op_9xy0; // 0x9xy0 (SNE Vx, Vy)
   opcode_table[0xA] = op_Annn; // 0xAnnn (LD I, addr)
   opcode_table[0xB] = op_Bnnn; // 0xBnnn (JP V0, addr)
@@ -458,8 +557,10 @@ void init_opcode_table(void) {
   opcode_table[0xF] = op_Fx__; // 0xFx** (misc, handled by op_Fx__)
 }
 
-void op_0xxx(chip8_t *chip8) {
-  switch (chip8->opcode) {
+void op_0xxx(chip8_t *chip8)
+{
+  switch (chip8->opcode)
+  {
   case 0x00E0:
     op_00E0(chip8);
     break; // CLS
@@ -473,10 +574,12 @@ void op_0xxx(chip8_t *chip8) {
 }
 
 // Handles all 0x8xy* opcodes (arithmetic/logical)
-void op_8xy_(chip8_t *chip8) {
+void op_8xy_(chip8_t *chip8)
+{
   uint16_t opcode = chip8->opcode;
   uint8_t n = opcode & 0x000F;
-  switch (n) {
+  switch (n)
+  {
   case 0x0:
     op_8xy0(chip8);
     break;
@@ -510,10 +613,12 @@ void op_8xy_(chip8_t *chip8) {
 }
 
 // Handles all 0xEx** opcodes (keypad)
-void op_Ex__(chip8_t *chip8) {
+void op_Ex__(chip8_t *chip8)
+{
   uint16_t opcode = chip8->opcode;
   uint8_t kk = opcode & 0x00FF;
-  switch (kk) {
+  switch (kk)
+  {
   case 0x9E:
     op_Ex9E(chip8);
     break;
@@ -526,10 +631,12 @@ void op_Ex__(chip8_t *chip8) {
 }
 
 // Handles all 0xFx** opcodes (misc)
-void op_Fx__(chip8_t *chip8) {
+void op_Fx__(chip8_t *chip8)
+{
   uint16_t opcode = chip8->opcode;
   uint8_t kk = opcode & 0x00FF;
-  switch (kk) {
+  switch (kk)
+  {
   case 0x07:
     op_Fx07(chip8);
     break;
@@ -562,22 +669,24 @@ void op_Fx__(chip8_t *chip8) {
   }
 }
 
-void *init_chip8(chip8_t *chip8) {
+void init_chip8(chip8_t *chip8)
+{
   // Initialize PC at 0x200
   chip8->pc = START_ADDRESS;
   // Load Font set into memory
-  for (unsigned int i = 0; i < FONTSET_SIZE; ++i) {
+  for (unsigned int i = 0; i < FONTSET_SIZE; ++i)
+  {
     chip8->memory[FONTSET_START_ADDRESS + i] = fontset[i];
   }
   rng_seed((uint32_t)time(NULL));
   init_opcode_table();
-
-  return chip8;
 }
 
-int32_t load_rom(chip8_t *chip8, const char *filename) {
+int load_rom(chip8_t *chip8, const char *filename)
+{
   FILE *fptr = fopen(filename, "rb");
-  if (fptr == NULL) {
+  if (fptr == NULL)
+  {
     return -1;
   }
 
@@ -587,13 +696,15 @@ int32_t load_rom(chip8_t *chip8, const char *filename) {
   fseek(fptr, 0, SEEK_SET);
 
   // Check if ROM fits in memory (0x200 to 0xFFF = 3584 bytes max)
-  if (file_size > 4096 - START_ADDRESS) {
+  if (file_size > 4096 - START_ADDRESS)
+  {
     fclose(fptr);
     return -1; // ROM too large
   }
 
   char *buffer = (char *)malloc((size_t)file_size);
-  if (buffer == NULL) {
+  if (buffer == NULL)
+  {
     fclose(fptr);
     return -1; // Memory allocation failed
   }
@@ -602,7 +713,8 @@ int32_t load_rom(chip8_t *chip8, const char *filename) {
   fclose(fptr);
 
   // Copy ROM data into Chip-8 memory starting at 0x200
-  for (long i = 0; i < file_size; ++i) {
+  for (long i = 0; i < file_size; ++i)
+  {
     chip8->memory[START_ADDRESS + i] = (unsigned char)buffer[i];
   }
   free(buffer);
@@ -610,7 +722,8 @@ int32_t load_rom(chip8_t *chip8, const char *filename) {
   return 0;
 }
 
-void cycle(chip8_t *chip8) {
+void cycle(chip8_t *chip8)
+{
   // Call set_opcode for grabbing instr and incr pc
   set_opcode(chip8);
 
@@ -620,17 +733,8 @@ void cycle(chip8_t *chip8) {
   // Check if function pointer is nil AKA invalid isntruction
   if (handler)
     handler(chip8);
+    update_timers(chip8);
   else
     // TODO: Better error handling for invalid isntruction
     printf("Error handling instruction");
-
-  // Decrement delay timer if set
-  if (chip8->delay_timer > 0) {
-    --chip8->delay_timer;
-  }
-
-  // Decrement sound timer if set
-  if (chip8->sound_timer > 0) {
-    --chip8->sound_timer;
-  }
 }

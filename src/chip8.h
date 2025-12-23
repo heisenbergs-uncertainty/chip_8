@@ -38,14 +38,15 @@
 // |  interpreter  |
 // +---------------+= 0x000 (0) Start of Chip-8 RAM
 
-typedef struct {
+typedef struct
+{
   // General Purpose 8bit registers
   // Referred to as Vx where x is a hexadecimal digit (0-F)
   uint8_t registers[V_REG_COUNT]; // 16 General Purpose 8-bit registers
 
   // Memory - 4KB
   uint8_t memory[MEMORY_SIZE]; // Chip-8 had access to 4KB memory
-  uint16_t index; // (I) Memory addresses - only lowest (rightmost) 12 used
+  uint16_t index;              // (I) Memory addresses - only lowest (rightmost) 12 used
 
   // Special Purpose 8-bit registers
   // When either is non-zero they automaticallly decrement at a rate of 60Hz.
@@ -82,7 +83,16 @@ extern opcodehandler_t opcode_table[16];
  *
  * @param chip8 Pointer to the CHIP-8 state structure.
  */
-void *init_chip8(chip8_t *chip8);
+void init_chip8(chip8_t *chip8);
+
+/**
+ * @brief Load a ROM file into the CHIP-8 memory.
+ *
+ * @param chip8 Pointer to the CHIP-8 state structure.
+ * @param filename Path to the ROM file.
+ * @return int 0 on success, -1 on failure.
+ */
+int load_rom(chip8_t *chip8, const char *filename);
 
 /**
  * @brief Set the current opcode for the CHIP-8 system.
@@ -96,7 +106,15 @@ void set_opcode(chip8_t *chip8);
  *
  * @param chip8 Pointer to the CHIP-8 state structure.
  */
-void process_instruction(chip8_t *chip8);
+void cycle(chip8_t *chip8);
+
+/**
+ * @brief Update the CHIP-8 timers (delay and sound).
+ * Should be called at 60Hz.
+ *
+ * @param chip8 Pointer to the CHIP-8 state structure.
+ */
+void update_timers(chip8_t *chip8);
 
 /**
  * @brief Process the current instruction for the CHIP-8 system.
@@ -118,25 +136,6 @@ void cycle(chip8_t *chip8);
  * @param chip8 Pointer to the CHIP-8 state structure.
  */
 void update_timers(chip8_t *chip8);
-
-/**
- * @brief Get the value of a display pixel.
- *
- * @param chip8 Pointer to the CHIP-8 state structure.
- * @param x X coordinate of the pixel.
- * @param y Y coordinate of the pixel.
- * @return true if the pixel is set, false otherwise.
- */
-bool get_display_pixel(chip8_t *chip8, int x, int y);
-
-/**
- * @brief Set the value of a display pixel.
- *
- * @param chip8 Pointer to the CHIP-8 state structure.
- * @param x X coordinate of the pixel.
- * @param y Y coordinate of the pixel.
- */
-void set_display_pixel(chip8_t *chip8, int x, int y);
 
 // Instruction (opcode) handling methods
 
