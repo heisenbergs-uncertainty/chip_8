@@ -320,8 +320,8 @@ void op_Cxkk(chip8_t *chip8)
 // DRW Vx, Vy, nibble
 void op_Dxyn(chip8_t *chip8)
 {
-  uint8_t Vx = chip8->opcode & 0x0F00u >> 8u;
-  uint8_t Vy = chip8->opcode & 0x00F0u >> 4u;
+  uint8_t Vx = (chip8->opcode & 0x0F00u) >> 8u;
+  uint8_t Vy = (chip8->opcode & 0x00F0u) >> 4u;
   // n (last nibble)
   uint8_t height = chip8->opcode & 0x000Fu;
 
@@ -336,6 +336,13 @@ void op_Dxyn(chip8_t *chip8)
     for (unsigned int j = 0; j < 8; ++j)
     {
       uint8_t spritePixel = spriteByte & (0x80 >> j);
+
+      // Check boundaries to prevent buffer overflow
+      if (xPos + j >= DISPLAY_WIDTH || yPos + i >= DISPLAY_HEIGHT)
+      {
+        continue;
+      }
+
       uint32_t *screenPixel =
           &chip8->display[(yPos + i) * DISPLAY_WIDTH + (xPos + j)];
 
