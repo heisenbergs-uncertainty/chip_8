@@ -733,8 +733,9 @@ void cycle(chip8_t *chip8)
   // Check if function pointer is nil AKA invalid isntruction
   if (handler)
     handler(chip8);
-    update_timers(chip8);
   else
     // TODO: Better error handling for invalid isntruction
     printf("Error handling instruction");
+
+  update_timers(chip8);
 }
