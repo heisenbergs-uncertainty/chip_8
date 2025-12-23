@@ -678,6 +678,7 @@ void op_Fx__(chip8_t *chip8)
 
 void init_chip8(chip8_t *chip8)
 {
+  memset(chip8, 0, sizeof(chip8_t));
   // Initialize PC at 0x200
   chip8->pc = START_ADDRESS;
   // Load Font set into memory
@@ -743,6 +744,4 @@ void cycle(chip8_t *chip8)
   else
     // TODO: Better error handling for invalid isntruction
     printf("Error handling instruction");
-
-  update_timers(chip8);
 }

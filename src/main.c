@@ -114,7 +114,7 @@ int main(int argc, char *argv[])
       cycle(&chip8);
     }
 
-    //update_timers(&chip8);
+    update_timers(&chip8);
     update_platform(&platform, chip8.display, videoPitch);
 
     frameTime = SDL_GetTicks() - frameStart;
