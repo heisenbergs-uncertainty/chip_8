@@ -503,15 +503,18 @@ void op_Fx29(chip8_t *chip8)
 void op_Fx33(chip8_t *chip8)
 {
   uint8_t Vx = (chip8->opcode & 0x0F00u) >> 8u;
-  uint8_t digit = chip8->registers[Vx];
+  uint8_t value = chip8->registers[Vx];
 
-  chip8->memory[chip8->index] = digit % 10;
-  digit /= 10;
+  // Store hundreds digit at I
+  chip8->memory[chip8->index + 2] = value % 10;
+  value /= 10;
 
-  chip8->memory[chip8->index + 1] = digit % 10;
-  digit /= 10;
+  // Store tens digit at I+1
+  chip8->memory[chip8->index + 1] = value % 10;
+  value /= 10;
 
-  chip8->memory[chip8->index + 2] = digit % 10;
+  // Store ones digit at I+2
+  chip8->memory[chip8->index] = value % 10;
 }
 
 // LD [I], Vx
@@ -519,7 +522,7 @@ void op_Fx55(chip8_t *chip8)
 {
   uint8_t Vx = (chip8->opcode & 0x0F00u) >> 8u;
 
-  for (int i = 0; i < Vx; ++i)
+  for (int i = 0; i <= Vx; ++i)
   {
     chip8->memory[chip8->index + i] = chip8->registers[i];
   }
@@ -530,7 +533,7 @@ void op_Fx65(chip8_t *chip8)
 {
   uint8_t Vx = (chip8->opcode & 0x0F00u) >> 8u;
 
-  for (int i = 0; i < Vx; ++i)
+  for (int i = 0; i <= Vx; ++i)
   {
     chip8->registers[i] = chip8->memory[chip8->index + i];
   }
